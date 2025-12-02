@@ -1,166 +1,197 @@
-import turtle
+import pygame
 import time
 import random
+import sys
 
-# Game speed
-delay = 0.1
-
-# Score
-score = 0
-high_score = 0
+pygame.init()
 
 # Screen
-win = turtle.Screen()
-win.title("Snake Game - Your Version 😎")
-win.bgcolor("black")
-win.setup(width=600, height=600)
-win.tracer(0)
+WIDTH = 720
+HEIGHT = 480
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Snake Game V2")
 
-# Snake head
-head = turtle.Turtle()
-head.speed(0)
-head.shape("square")
-head.color("lime")
-head.penup()
-head.goto(0, 0)
-head.direction = "stop"
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+PURPLE = (160, 32, 240)
+RED = (213, 50, 50)
+BLUE = (30, 144, 255)
 
-# Food
-food = turtle.Turtle()
-food.speed(0)
-food.shape("circle")
-food.color("red")
-food.penup()
-food.goto(0, 100)
+clock = pygame.time.Clock()
+snake_block = 20
+snake_speed = 12
 
-# Body segments
-segments = []
+font_style = pygame.font.SysFont("bahnschrift", 25)
+menu_font = pygame.font.SysFont("consolas", 60)
+info_font = pygame.font.SysFont("consolas", 28)
 
-# Scoreboard
-scoreboard = turtle.Turtle()
-scoreboard.speed(0)
-scoreboard.hideturtle()
-scoreboard.color("white")
-scoreboard.penup()
-scoreboard.goto(0, 260)
-scoreboard.write("Score: 0  High Score: 0", align="center", font=("Courier", 18, "bold"))
+def message(msg, color, y):
+    mesg = font_style.render(msg, True, color)
+    screen.blit(mesg, [WIDTH / 6, y])
 
+# Snake Drawing
+def draw_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(screen, GREEN, [x[0], x[1], snake_block, snake_block])
 
-# Movement functions
-def go_up():
-    if head.direction != "down":
-        head.direction = "up"
+# Score
+def draw_score(score):
+    val = font_style.render("Score: " + str(score), True, BLUE)
+    screen.blit(val, [0, 0])
 
+# Main Menu
+def main_menu():
+    selected = 0
+    menu_items = ["START GAME", "QUIT"]
 
-def go_down():
-    if head.direction != "up":
-        head.direction = "down"
+    title_y = 120
+    title_direction = 1
 
+    while True:
+        screen.fill(BLACK)
 
-def go_left():
-    if head.direction != "right":
-        head.direction = "left"
+        # Title Animation
+        title = menu_font.render("SNAKE GAME", True, GREEN)
+        screen.blit(title, (WIDTH/2 - title.get_width()/2, title_y))
+        title_y += title_direction
+        if title_y < 110 or title_y > 130:
+            title_direction *= -1
 
+        # Menu Options
+        for i, text in enumerate(menu_items):
+            color = WHITE if i == selected else (150, 150, 150)
+            item = info_font.render(text, True, color)
+            screen.blit(item, (WIDTH/2 - item.get_width()/2, 250 + i*50))
 
-def go_right():
-    if head.direction != "left":
-        head.direction = "right"
+        pygame.display.update()
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-def move():
-    if head.direction == "up":
-        y = head.ycor()
-        head.sety(y + 20)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and selected > 0:
+                    selected -= 1
+                elif event.key == pygame.K_DOWN and selected < len(menu_items)-1:
+                    selected += 1
+                elif event.key == pygame.K_RETURN:
+                    if selected == 0:
+                        game_loop()
+                    else:
+                        pygame.quit()
+                        sys.exit()
 
-    if head.direction == "down":
-        y = head.ycor()
-        head.sety(y - 20)
-
-    if head.direction == "left":
-        x = head.xcor()
-        head.setx(x - 20)
-
-    if head.direction == "right":
-        x = head.xcor()
-        head.setx(x + 20)
-
-
-# Keyboard controls
-win.listen()
-win.onkeypress(go_up, "Up")
-win.onkeypress(go_down, "Down")
-win.onkeypress(go_left, "Left")
-win.onkeypress(go_right, "Right")
+        clock.tick(10)
 
 # Game Loop
-while True:
-    win.update()
+def game_loop():
+    game_over = False
+    game_close = False
 
-    # Border collision
-    if head.xcor() > 290 or head.xcor() < -290 or head.ycor() > 290 or head.ycor() < -290:
-        time.sleep(1)
-        head.goto(0, 0)
-        head.direction = "stop"
+    x = WIDTH / 2
+    y = HEIGHT / 2
+    dx = 0
+    dy = 0
 
-        # Reset body
-        for segment in segments:
-            segment.goto(1000, 1000)
-        segments.clear()
+    snake_list = []
+    length = 1
 
-        score = 0
-        delay = 0.1
-        scoreboard.clear()
-        scoreboard.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Courier", 18, "bold"))
+    food_x = round(random.randrange(0, WIDTH - snake_block) / 20) * 20
+    food_y = round(random.randrange(0, HEIGHT - snake_block) / 20) * 20
 
-    # Eat food
-    if head.distance(food) < 15:
-        # Move food
-        food.goto(random.randint(-280, 280), random.randint(-280, 280))
+    # Berry
+    berry_active = False
+    berry_x = berry_y = 0
 
-        # Add segment
-        new_segment = turtle.Turtle()
-        new_segment.speed(0)
-        new_segment.shape("square")
-        new_segment.color("yellow")
-        new_segment.penup()
-        segments.append(new_segment)
+    score = 0
 
-        # Increase score
-        score += 10
-        if score > high_score:
-            high_score = score
+    while not game_over:
 
-        scoreboard.clear()
-        scoreboard.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Courier", 18, "bold"))
-        delay -= 0.001
+        while game_close:
+            screen.fill(BLACK)
+            message("Game Over! Press ENTER to restart", RED, HEIGHT/3)
+            message("Press Q to Quit", RED, HEIGHT/2)
+            pygame.display.update()
 
-    # Move segments
-    for index in range(len(segments) - 1, 0, -1):
-        x = segments[index - 1].xcor()
-        y = segments[index - 1].ycor()
-        segments[index].goto(x, y)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        sys.exit()
+                    if event.key == pygame.K_RETURN:
+                        game_loop()
 
-    if len(segments) > 0:
-        segments[0].goto(head.xcor(), head.ycor())
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-    move()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    dx = -snake_block
+                    dy = 0
+                elif event.key == pygame.K_RIGHT:
+                    dx = snake_block
+                    dy = 0
+                elif event.key == pygame.K_UP:
+                    dy = -snake_block
+                    dx = 0
+                elif event.key == pygame.K_DOWN:
+                    dy = snake_block
+                    dx = 0
 
-    # Body collision
-    for segment in segments:
-        if segment.distance(head) < 15:
-            time.sleep(1)
-            head.goto(0, 0)
-            head.direction = "stop"
+        x += dx
+        y += dy
 
-            for segment in segments:
-                segment.goto(1000, 1000)
-            segments.clear()
+        if x >= WIDTH or x < 0 or y >= HEIGHT or y < 0:
+            game_close = True
 
-            score = 0
-            delay = 0.1
-            scoreboard.clear()
-            scoreboard.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Courier", 18, "bold"))
+        screen.fill(BLACK)
+        pygame.draw.rect(screen, RED, [food_x, food_y, snake_block, snake_block])  # Food
 
-    time.sleep(delay)
+        # Draw Berry if active
+        if berry_active:
+            pygame.draw.rect(screen, PURPLE, [berry_x, berry_y, snake_block, snake_block])
 
-win.mainloop()
+        snake_head = [x, y]
+        snake_list.append(snake_head)
+        if len(snake_list) > length:
+            del snake_list[0]
+
+        for block in snake_list[:-1]:
+            if block == snake_head:
+                game_close = True
+
+        draw_snake(snake_block, snake_list)
+        draw_score(score)
+
+        pygame.display.update()
+
+        # Eating food
+        if x == food_x and y == food_y:
+            score += 1
+            length += 1
+            food_x = round(random.randrange(0, WIDTH - snake_block) / 20) * 20
+            food_y = round(random.randrange(0, HEIGHT - snake_block) / 20) * 20
+
+            # Chance for berry to spawn (15%)
+            if random.random() < 0.15:
+                berry_active = True
+                berry_x = round(random.randrange(0, WIDTH - snake_block) / 20) * 20
+                berry_y = round(random.randrange(0, HEIGHT - snake_block) / 20) * 20
+
+        # Eating berry
+        if berry_active and x == berry_x and y == berry_y:
+            score += 5
+            length += 2
+            berry_active = False
+
+        clock.tick(snake_speed)
+
+    pygame.quit()
+    sys.exit()
+
+main_menu()
