@@ -76,13 +76,13 @@ python snake_game_v6.py
 ## 📸 Game Screenshots
 
 ### 🏁 Main Menu
-![Menu Screen](Images/menu_screen.png)
+![Menu Screen](menu_screen.png)
 
 ### 🎮 Gameplay
-![Gameplay Screenshot](Images/gameplay.png)
+![Gameplay Screenshot](gameplay.png)
 
 ### 💀 Game Over Screen
-![Game Over](Images/game_over.png)
+![Game Over](game_over.png)
 
  ---
 
