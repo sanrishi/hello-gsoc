@@ -23,6 +23,7 @@ I am developing this project as part of my learning journey towards **Google Sum
  ---
 
 📂 Folder Structure
+```bash
 Snake-Game/
 │
 ├── Images/
@@ -32,7 +33,7 @@ Snake-Game/
 │
 ├── snake_game_v6.py
 └── README.md
-
+ ```
  
  ---
 
@@ -43,16 +44,16 @@ Snake-Game/
    ```bash
    pip install pygame
 3. Run the game:
-   ```bash
-git clone https://github.com/SanchitDev/snake_game_v6.git
+ ```bash
+git clone https://github.com/Sanchit122006/snake_game_v6.git
 cd snake-game-v6
 python snake_game_v6.py
 
 
- ---
+ ```
+    
 
-
- ✨ Updated Features
+✨ Updated Features
 
  🍎 Apple = +1 point
 
