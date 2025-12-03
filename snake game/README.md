@@ -19,7 +19,23 @@ I am developing this project as part of my learning journey towards **Google Sum
 - **Pygame**
 - **Git & GitHub**
 
----
+
+ ---
+
+📂 Folder Structure
+Snake-Game/
+│
+├── Images/
+│   ├── apple.png
+│   ├── berry.png
+│   ├── bluesky.png
+│
+├── snake_game_v6.py
+└── README.md
+
+ 
+ ---
+
 
 ## ▶️ How to Run
 1. Install Python 3.11 or above  
@@ -28,7 +44,9 @@ I am developing this project as part of my learning journey towards **Google Sum
    pip install pygame
 3. Run the game:
    ```bash
-   python snake_game6.py
+git clone https://github.com/SanchitDev/snake_game_v6.git
+cd snake-game-v6
+python snake_game_v6.py
 
 
  ---
