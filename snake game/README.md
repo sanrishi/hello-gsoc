@@ -69,7 +69,7 @@ python snake_game_v6.py
 
  ⌨ Smooth keyboard controls
 
-
+ 🎵 Sounds & Animations
  ---
 
 
